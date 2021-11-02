@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from _token import token
+
 import logging
 import random
+try:
+    import settings
+except ImportError:
+    exit('Do cp settings.py.default settings.py and set TOKEN')
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
-group_id = 41621661
+
 
 log = logging.getLogger('bot')
 def configure_logging():
@@ -24,7 +28,17 @@ def configure_logging():
 
 
 class Bot(object):
+    """
+    Echo bot for vk.com
+
+    Use python3.7
+    """
     def __init__(self, group_id, token):
+        """
+        :param group_id: group_id from group vk.com
+        :param token: secret token from group vk.com
+
+        """
         self.group_id = group_id
         self.token = token
         self.vk = vk_api.VkApi(token=token)
@@ -34,6 +48,9 @@ class Bot(object):
 
 
     def run(self):
+        """
+        Run bot
+        """
         for event in self.long_poller.listen():
             # print('Send a message')
             try:
@@ -42,6 +59,13 @@ class Bot(object):
                 log.exception('ошибка в обработке события')
 
     def on_event(self, event):
+        """
+        handle bots messages: sent our message back, if it's text
+        :param event: VkBotMessageEvent object
+        :return: None
+
+        """
+
         if event.type == VkBotEventType.MESSAGE_NEW:
             log.debug('отправляем сообщение назад')
             self.api.messages.send(message=f'было полученно сообщение: '
@@ -54,5 +78,5 @@ class Bot(object):
 
 if __name__ == "__main__":
     configure_logging()
-    bot = Bot(group_id, token)
+    bot = Bot(settings.GROUP_ID, settings.TOKEN)
     bot.run()
